@@ -1,0 +1,87 @@
+#lang racket
+(require racket/mpair)
+
+(define testing1 
+  (lambda (object-name)
+    (mlist object-name)))
+
+(testing1 '("hi" 3 4))
+
+(define car% ;;procenttecken för god konvention för att skapa alla klasser. 
+  (class object% ;;"object%" är en väldigt primitiv funktion, ett tomt object som finns i racket (typ) 
+    (init-field x-pos ;; lokala variabler
+                y-pos
+                x-velocity
+                y-velocity
+                brand
+                [color 'black]);detta fält har ett default värde. 
+    (field [age 0]) ;;kan ej ange 
+    (define/public (move distance)
+      (begin 
+        (set! x-pos (+ x-pos distance))
+        (set! age (+ age 1)))) ;;vajre gång kör +1 år 
+    (define/public (get-position)
+      (cons x-pos y-pos))
+    (super-new)))
+
+(define audi (new car%
+                  [x-pos 0]
+                  [y-pos 0]
+                  [x-velocity 5]
+                  [y-velocity 5]
+                  [brand "audi"])) ;;hakparantes lätt och läsa 
+
+(send audi move 20) ;; send är ett sätt att nå objektklassen och en def. 
+
+(define cool-car%
+  (class car%
+    (super-new)))
+
+#|Ett annat sätt att skapa ett objekt som liknar den ovan:|# 
+(define car-version2% ;;procenttecken för god konvention för att skapa alla klasser. 
+  (class object% ;;"object%" är en väldigt primitiv funktion, ett tomt object som finns i racket (typ) 
+    (init-field x-pos ;; lokala variabler
+                y-pos
+                x-velocity
+                y-velocity
+                brand
+                [color 'black]);om jag vill 
+    (field [age 0]) ;;kan ej ange 
+    (define/public (move distance)
+      (begin 
+        (set! x-pos (+ x-pos distance))
+        (set! age (+ age 1)))) ;;vajre gång kör +1 år 
+    (define/public (get-position)
+      (cons x-pos y-pos))
+    (super-new)))
+
+(define car1 (make-object car-version2% 13 3 5 5 'SAAB)) 
+
+
+
+;///
+
+(define car%
+  (class object%
+    (init-field x-pos y-pos x-velocity y-velocity brand [color ’black])
+    (field [age 0])
+    ;; Tests if the car is old.
+    (define/public (old?)  (> age 50))
+    ;; Calculates the x-position after moving.
+    (define/private (after-move steps)
+      (+ x-pos (* x-velocity steps)))
+    ;; Checks if it is legal to move n steps.
+    (define/private (legal-move? n)
+      (>= (after-move n) 0))
+    ;; Executes a move, if legal.
+    (define/public (move steps)
+      (set! age (+ age 1))
+      (cond
+        [(old?) (error "Car is old and busted!")]
+        [(legal-move? steps)
+         (set! x-pos (after-move steps))]
+        [else (error "Outside!")]))
+    ;; get the x position of the car
+    (define/public (get-x) x-pos)
+    ;; --- F ̈orenklad hantering. Enbart flytt i x-led ---
+    (super-new)))
